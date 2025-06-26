@@ -1,0 +1,24 @@
+[tools]
+go = "1.24.4"
+"go:github.com/pressly/goose/v3/cmd/goose" = "latest"
+"go:github.com/sqlc-dev/sqlc/cmd/sqlc" = "latest"
+
+[env]
+DATABASE_NAME = "goma_dev"
+PGDATABASE = "{{ env.DATABASE_NAME }}"
+DATABASE_URL = "postgres://postgres:postgres@localhost/{{ env.DATABASE_NAME }}?sslmode=disable"
+GOOSE_DRIVER = "postgres"
+GOOSE_MIGRATION_DIR = "db/migrations"
+GOOSE_DBSTRING = "{{ env.DATABASE_URL }}"
+
+[tasks."db.setup"]
+run = [
+  "mise run db.create",
+  "mise run db.migrate",
+]
+
+[tasks."db.create"]
+run = "createdb {{ env.DATABASE_NAME }} || true"
+
+[tasks."db.migrate"]
+run = "goose up"
