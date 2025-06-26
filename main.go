@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+	"oauth-provider/config"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -24,19 +24,8 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello world!")
 }
 
-var LISTEN_ON = ":3000"
-var DATABASE_URL = MustGetenv("DATABASE_URL")
-
-func MustGetenv(key string) string {
-	val := os.Getenv(key)
-	if val == "" {
-		log.Fatalf("Environment variable %s is not set!", key)
-	}
-	return val
-}
-
 func main() {
-	config, err := pgxpool.ParseConfig(DATABASE_URL)
+	cfg, err := pgxpool.ParseConfig(config.DATABASE_URL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,9 +33,9 @@ func main() {
 	tracer := tracelog.TraceLog{}
 	tracer.Logger = tracelog.LoggerFunc(logQuery)
 	tracer.LogLevel = tracelog.LogLevelInfo
-	config.ConnConfig.Tracer = &tracer
+	cfg.ConnConfig.Tracer = &tracer
 
-	conn, err := pgxpool.NewWithConfig(context.Background(), config)
+	conn, err := pgxpool.NewWithConfig(context.Background(), cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,6 +44,6 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Get("/", handleGet)
-	log.Printf("Listening on %s", LISTEN_ON)
-	log.Fatal(http.ListenAndServe(LISTEN_ON, r))
+	log.Printf("Listening on %s", config.LISTEN_ON)
+	log.Fatal(http.ListenAndServe(config.LISTEN_ON, r))
 }

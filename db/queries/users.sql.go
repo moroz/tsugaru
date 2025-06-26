@@ -13,7 +13,7 @@ const getUserByEmail = `-- name: GetUserByEmail :one
 select id, email, password_hash, inserted_at, updated_at from users where email = $1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (*User, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
 	var i User
 	err := row.Scan(
@@ -23,5 +23,5 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.InsertedAt,
 		&i.UpdatedAt,
 	)
-	return i, err
+	return &i, err
 }

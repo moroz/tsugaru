@@ -10,6 +10,8 @@ DATABASE_URL = "postgres://postgres:postgres@localhost/{{ env.DATABASE_NAME }}?s
 GOOSE_DRIVER = "postgres"
 GOOSE_MIGRATION_DIR = "db/migrations"
 GOOSE_DBSTRING = "{{ env.DATABASE_URL }}"
+TEST_DATABASE = "goma_test"
+TEST_DATABASE_URL = "postgres://postgres:postgres@localhost/{{ env.TEST_DATABASE }}?sslmode=disable"
 
 [tasks."db.setup"]
 run = [
@@ -22,3 +24,28 @@ run = "createdb {{ env.DATABASE_NAME }} || true"
 
 [tasks."db.migrate"]
 run = "goose up"
+
+[tasks."db.test.prepare"]
+run = [
+  "mise run db.test.create",
+  "mise run db.test.migrate",
+  "mise run db.test.seed",
+]
+
+[tasks."db.test.create"]
+run = "createdb {{ env.TEST_DATABASE }} || true"
+
+[tasks."db.test.migrate"]
+run = "env GOOSE_DBSTRING=\"{{ env.TEST_DATABASE_URL }}\" goose up"
+
+[tasks."db.test.seed"]
+run = """
+set -euo pipefail
+for file in db/seeds/*.sql; do
+  psql "{{ env.TEST_DATABASE_URL }}" -f "$file";
+done
+"""
+
+[tasks."test"]
+run = "go test -v ./..."
+depends = ["db.test.prepare"]
