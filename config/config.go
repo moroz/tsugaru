@@ -1,11 +1,6 @@
 package config
 
 import (
-	"crypto/ed25519"
-	"crypto/x509"
-	"encoding/pem"
-	"errors"
-	"fmt"
 	"log"
 	"os"
 )
@@ -18,41 +13,16 @@ func MustGetenv(key string) string {
 	return val
 }
 
+func GetenvWithDefault(key, def string) string {
+	val := os.Getenv(key)
+	if val != "" {
+		return val
+	}
+	return def
+}
+
 var LISTEN_ON = ":3000"
 var DATABASE_URL = MustGetenv("DATABASE_URL")
+var HOST = GetenvWithDefault("HOST", "auth.authorizz.localhost")
 
-var ErrInvalidKeypair = errors.New("invalid PEM key")
-
-func LoadKeypair(pemBytes []byte) (ed25519.PrivateKey, error) {
-	block, _ := pem.Decode(pemBytes)
-	if block == nil {
-		return nil, ErrInvalidKeypair
-	}
-
-	parseResult, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	switch k := parseResult.(type) {
-	case ed25519.PrivateKey:
-		return k, nil
-	default:
-		return nil, fmt.Errorf("%w (got type %T)", ErrInvalidKeypair, k)
-	}
-}
-
-func LoadKeyPairFromFile(path string) (ed25519.PrivateKey, error) {
-	bytes, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	return LoadKeypair(bytes)
-}
-
-func Must[T any](v T, err error) T {
-	if err != nil {
-		log.Fatal(err)
-	}
-	return v
-}
+var BASE_URL = "https://" + HOST

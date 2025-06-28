@@ -19,3 +19,7 @@ func (c *discoveryController) Certs(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(jwks)
 }
+
+func OpenIDConfiguration(w http.ResponseWriter, r *http.Request) {
+
+}

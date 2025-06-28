@@ -1,5 +1,7 @@
 [tools]
+caddy = "latest"
 go = "1.24.4"
+"go:github.com/cortesi/modd/cmd/modd" = "latest"
 "go:github.com/pressly/goose/v3/cmd/goose" = "latest"
 "go:github.com/sqlc-dev/sqlc/cmd/sqlc" = "latest"
 

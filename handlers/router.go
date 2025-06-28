@@ -23,6 +23,6 @@ func Router(db queries.DBTX, keyService services.KeyService) http.Handler {
 	r.Get("/", handleGet)
 
 	discovery := DiscoveryController(keyService)
-	r.Get("/certs", discovery.Certs)
+	r.Get("/.well-known/oauth/openid/jwks", discovery.Certs)
 	return r
 }
