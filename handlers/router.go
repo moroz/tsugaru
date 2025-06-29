@@ -24,5 +24,6 @@ func Router(db queries.DBTX, keyService services.KeyService) http.Handler {
 
 	discovery := DiscoveryController(keyService)
 	r.Get("/.well-known/oauth/openid/jwks", discovery.Certs)
+	r.Get("/.well-known/openid-configuration", discovery.OpenIDConfiguration)
 	return r
 }
