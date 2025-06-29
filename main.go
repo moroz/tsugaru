@@ -7,6 +7,7 @@ import (
 	"oauth-provider/config"
 	"oauth-provider/handlers"
 	"oauth-provider/services"
+	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/tracelog"
@@ -21,24 +22,16 @@ func logQuery(_ context.Context, level tracelog.LogLevel, msg string, data map[s
 }
 
 func main() {
-	cfg, err := pgxpool.ParseConfig(config.DATABASE_URL)
-	if err != nil {
-		log.Fatal(err)
-	}
+	cfg := config.Must(pgxpool.ParseConfig(config.DATABASE_URL))
 
 	tracer := tracelog.TraceLog{}
 	tracer.Logger = tracelog.LoggerFunc(logQuery)
 	tracer.LogLevel = tracelog.LogLevelInfo
 	cfg.ConnConfig.Tracer = &tracer
 
-	conn, err := pgxpool.NewWithConfig(context.Background(), cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	pk := config.Must(config.LoadKeyPairFromFile("keys/private.pem"))
-
-	r := handlers.Router(conn, services.Ed25519KeyService(pk))
+	db := config.Must(pgxpool.NewWithConfig(context.Background(), cfg))
+	pem := config.Must(os.ReadFile("keys/private.pem"))
+	r := handlers.Router(db, config.Must(services.RS256KeyServiceFromPEM(pem)))
 
 	log.Printf("Listening on %s", config.LISTEN_ON)
 	log.Fatal(http.ListenAndServe(config.LISTEN_ON, r))

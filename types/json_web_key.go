@@ -29,15 +29,18 @@ type JWKAlgorithm string
 
 const (
 	JWKAlgorithm_EdDSA JWKAlgorithm = "EdDSA"
+	JWKAlgorithm_RS256 JWKAlgorithm = "RS256"
 )
 
 type JSONWebKey struct {
 	Algorithm JWKAlgorithm `json:"alg,omitempty"`
 	Curve     JWKCurve     `json:"crv,omitempty"`
-	D         string       `json:"d,omitempty"`
 	KeyID     string       `json:"kid,omitempty"`
 	KeyType   JWKKeyType   `json:"kty,omitempty"`
 	Use       JWKUse       `json:"use,omitempty"`
+	D         string       `json:"d,omitempty"`
+	E         string       `json:"e,omitempty"`
+	N         string       `json:"n,omitempty"`
 	X         string       `json:"x,omitempty"`
 }
 

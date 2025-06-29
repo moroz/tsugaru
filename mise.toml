@@ -52,10 +52,17 @@ done
 run = "go test -v ./..."
 depends = ["db.test.prepare"]
 
-[tasks."gen.cert"]
+[tasks."gen.keypair.ed25519"]
 run = """
 set -euo pipefail
 [[ -f keys/private.pem ]] && [[ -f keys/public.pem ]] && exit 0
 openssl genpkey -algorithm ed25519 -out keys/private.pem
 openssl pkey -in keys/private.pem -pubout -out keys/public.pem
+"""
+
+[tasks."gen.keypair.rsa"]
+run = """
+set -euo pipefail
+[[ -f keys/private.pem ]] && exit 0
+openssl genpkey -algorithm rsa -out keys/private.pem -pkeyopt bits:2048 2>/dev/null
 """
